@@ -1,6 +1,7 @@
 import jwt
+from sqlalchemy.orm import sessionmaker
 from flask import request, jsonify, g
-
+from user.user_dao import User, engine
 from config import SECRET
 
 
@@ -11,34 +12,36 @@ def login_required(func):
         if access_token:
             try:
                 payload = jwt.decode(access_token, SECRET['secret_key'], algorithm=SECRET['algorithm'])
-                account_no = payload['account_no']
+                id = payload['id']
 
-                db_connection = DatabaseConnection()
-                if db_connection:
+                Session = sessionmaker(bind=engine)
+                try:
+                    session = Session()
+                    user_info_db = session.query(User.auth_type_id, User.is_deleted).filter(User.id == payload['id']).one()
+
+                    if user_info_db:
+                        if not user_info_db[1]:
+                            g.user_info = {
+                                'user_id': id,
+                                'auth_type_id': user_info_db[0]
+                            }
+                            return func(*args, **kwargs)
+                        return jsonify({'message': 'DELETED_ACCOUNT'}), 400
+                    return jsonify({'message': 'ACCOUNT_DOES_NOT_EXIST'}), 404
+
+                except Exception as e:
+                    print(e)
+                    return jsonify({'message': e}), 500
+
+                finally:
                     try:
-                        with db_connection as db_cursor:
-                            get_account_info_stmt = ("""
-                                SELECT auth_type_id, is_deleted FROM accounts WHERE account_no=%(account_no)s
-                            """)
-                            db_cursor.execute(get_account_info_stmt, {'account_no': account_no})
-                            account = db_cursor.fetchone()
-                            if account:
-                                if account['is_deleted'] == 0:
-                                    g.account_info = {
-                                        'account_no': account_no,
-                                        'auth_type_id': account['auth_type_id']
-                                    }
-                                    return func(*args, **kwargs)
-                                return jsonify({'message': 'DELETED_ACCOUNT'}), 400
-                            return jsonify({'message': 'ACCOUNT_DOES_NOT_EXIST'}), 404
-
-                    except Error as e:
-                        print(f'DATABASE_CURSOR_ERROR_WITH {e}')
-                        return jsonify({'message': 'DB_CURSOR_ERROR'}), 400
+                        session.close()
+                    except Exception as e:
+                        print(e)
+                        return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
 
             except jwt.InvalidTokenError:
                 return jsonify({'message': 'INVALID_TOKEN'}), 401
 
-            return jsonify({'message': 'NO_DATABASE_CONNECTION'}), 400
         return jsonify({'message': 'INVALID_TOKEN'}), 401
     return wrapper

@@ -5,6 +5,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask.json import JSONEncoder
 from user.user_view import UserView
+from board.board_view import BoardView
 
 
 class CustomJSONEncoder(JSONEncoder):
@@ -65,6 +66,7 @@ def create_app():
     app.config['DEBUG'] = True
     CORS(app, resources={r"/*/*": {"origins": "*"}})
     app.register_blueprint(UserView.user_app)
+    app.register_blueprint(BoardView.board_app)
 
     return app
 

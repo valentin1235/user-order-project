@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy import Column, DateTime, Integer, String, Text, ForeignKey
+from sqlalchemy import Column, DateTime, Integer, String, Text, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
@@ -17,6 +17,7 @@ class Board(Base):
     name = Column('name', String(20), nullable=False)
     create_at = Column('created_at', DateTime(timezone=True), server_default=func.now())
     updated_at = Column('updated_at', DateTime(timezone=True), onupdate=func.now())
+    is_deleted = Column('is_deleted', Boolean(), default=False)
 
 
 class Article(Base):
@@ -29,6 +30,7 @@ class Article(Base):
     content = Column('content', Text(4294000000), nullable=False)
     create_at = Column('created_at', DateTime(timezone=True), server_default=func.now())
     updated_at = Column('updated_at', DateTime(timezone=True), onupdate=func.now())
+    is_deleted = Column('is_deleted', Boolean(), default=False)
 
 # Base.metadata.create_all(bind=engine)
 
