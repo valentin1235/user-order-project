@@ -61,7 +61,7 @@ class BoardService:
             Session = sessionmaker(bind=engine)
             session = Session()
             if session.query(Board.is_deleted).filter(Board.id == board_info['board_id']).one()[0]:
-                return  jsonify({'message': 'BOARD_NOT_EXISTS'}), 404
+                return jsonify({'message': 'BOARD_NOT_EXISTS'}), 404
 
             (session
              .query(Board)
@@ -150,7 +150,6 @@ class BoardService:
             Session = sessionmaker(bind=engine)
             session = Session()
 
-            # article_list = relationship("Writer", foreign_keys='Article.writer_id')
             if session.query(Board.is_deleted).filter(Board.id == board_id).one()[0]:
                 return  jsonify({'message': 'BOARD_NOT_EXISTS'}), 404
 
@@ -186,7 +185,6 @@ class BoardService:
             Session = sessionmaker(bind=engine)
             session = Session()
 
-            # article_list = relationship("Writer", foreign_keys='Article.writer_id')
             if session.query(Board.is_deleted).filter(Board.id == article_info['board_id']).one()[0]:
                 return  jsonify({'message': 'BOARD_NOT_EXISTS'}), 404
             if session.query(Article.is_deleted).filter(Article.id == article_info['article_id']).one()[0]:
@@ -254,7 +252,6 @@ class BoardService:
         return jsonify({'message': 'SUCCESS'}), 200
 
     def delete_article(self, article_info):
-        article = Article()
         try:
             Session = sessionmaker(bind=engine)
             session = Session()

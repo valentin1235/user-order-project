@@ -101,8 +101,6 @@ class BoardView:
     )
     def make_article(*args):
         user_info = g.user_info
-        # if user_info.get('auth_type_id') != 1:
-        #     return jsonify({'message': 'UNAUTHORIZED_ACTION'}), 400
 
         article_info = {
             'board_id': args[0],
