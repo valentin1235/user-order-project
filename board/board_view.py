@@ -1,11 +1,11 @@
 import json
 from datetime import datetime
-
 from flask import request, Blueprint, jsonify, g
 from flask_request_validator import (
     GET,
     PATH,
     FORM,
+    JSON,
     Param,
     Pattern,
     MaxLength,
@@ -21,12 +21,75 @@ class BoardView:
 
     @board_app.route("", methods=["POST"], endpoint='make_board')
     @login_required
-    def make_board():
+    @validate_params(
+        Param('name', JSON, str,
+              rules=[MaxLength(20)])
+    )
+    def make_board(*args):
+        print(args)
         user_info = g.user_info
-        print(user_info)
+        if user_info.get('auth_type_id') != 1:
+            return jsonify({'message': 'UNAUTHORIZED_ACTION'}), 400
+
+        board_info = {
+            'uploader': user_info['user_id'],
+            'name': args[0]
+        }
+        print(board_info)
         board_service = BoardService()
-        # result = board_service.make_board(request)
-        return jsonify({'message': user_info}), 200
+        result = board_service.make_board(board_info)
+        return result
 
+    @board_app.route("", methods=["GET"], endpoint='get_board_list')
+    @login_required
+    def get_board_list():
+        board_service = BoardService()
+        result = board_service.get_board_list()
+        return result
 
+    @board_app.route("/<int:board_id>", methods=["PUT"], endpoint='edit_board')
+    @login_required
+    @validate_params(
+        Param('board_id', PATH, int),
+        Param('name', JSON, str,
+              rules=[MaxLength(20)])
+    )
+    def edit_board(*args):
+        user_info = g.user_info
+        if user_info.get('auth_type_id') != 1:
+            return jsonify({'message': 'UNAUTHORIZED_ACTION'}), 400
 
+        board_info = {
+            'modifier': user_info['user_id'],
+            'board_id': args[0],
+            'new_name': args[1]
+        }
+        board_service = BoardService()
+        result = board_service.edit_board(board_info)
+        return result
+
+    @board_app.route("/<int:board_id>", methods=["DELETE"], endpoint='delete_board')
+    @login_required
+    @validate_params(
+        Param('board_id', PATH, int),
+        Param('is_deleted', JSON, int)
+    )
+    def delete_board(*args):
+        print(args)
+        user_info = g.user_info
+        if user_info.get('auth_type_id') != 1:
+            return jsonify({'message': 'UNAUTHORIZED_ACTION'}), 400
+
+        board_info = {
+            'modifier': user_info['user_id'],
+            'board_id': args[0],
+        }
+        if args[1] == 1:
+            board_info['is_deleted'] = True
+        else:
+            return jsonify({'message': 'INVALID_ACTION'}), 400
+
+        print(board_info)
+        board_service = BoardService()
+        result = board_service.delete_board(board_info)
+        return result
