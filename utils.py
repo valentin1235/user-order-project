@@ -29,8 +29,8 @@ def login_required(func):
                         return jsonify({'message': 'DELETED_ACCOUNT'}), 400
                     return jsonify({'message': 'ACCOUNT_DOES_NOT_EXIST'}), 404
 
-                # except TypeError:
-                #     return jsonify({'message': 'CHECK_TYPE'}), 400
+                except TypeError:
+                    return jsonify({'message': 'CHECK_TYPE'}), 400
 
                 except Exception as e:
                     print(e)

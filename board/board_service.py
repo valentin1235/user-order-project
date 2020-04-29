@@ -3,6 +3,7 @@ from .board_dao import engine, Board, Article
 from user.user_dao import User
 from sqlalchemy import exists
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy_filters import apply_filters
 
 
 class BoardService:
@@ -11,7 +12,6 @@ class BoardService:
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
-
             board.uploader = board_info['uploader']
             board.name = board_info['name']
             session.add(board)
@@ -30,12 +30,20 @@ class BoardService:
 
         return jsonify({'message': 'SUCCESS'}), 200
 
-    def get_board_list(self):
+    def get_board_list(self, board_info):
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
 
-            board_list = session.query(Board.id, Board.name, Board.uploader, Board.create_at).filter(Board.is_deleted == False).all()
+            filter_list = [
+                {'model': 'Board', 'field': 'is_deleted', 'op': '==', 'value': False},
+            ]
+            if board_info.get('name', None):
+                filter_list.append({'model': 'Board', 'field': 'name', 'op': 'like', 'value': '%'+board_info['name']+'%'})
+
+            board_query = (session
+                          .query(Board.id, Board.name, Board.uploader, Board.create_at))
+            board_list = apply_filters(board_query, filter_list).slice(board_info['offset'], board_info['limit']).all()
             boards = [{
                     'id': board[0],
                     'name': board[1],
@@ -54,7 +62,7 @@ class BoardService:
                 print(e)
                 return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
 
-        return jsonify({'boards': boards}), 200
+        return boards
 
     def edit_board(self, board_info):
         try:
@@ -145,27 +153,40 @@ class BoardService:
 
         return jsonify({'message': 'SUCCESS'}), 200
 
-    def get_article_list(self, board_id):
+    def get_article_list(self, article_info):
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
 
-            if session.query(Board.is_deleted).filter(Board.id == board_id).one()[0]:
+            if session.query(Board.is_deleted).filter(Board.id == article_info['board_id']).one()[0]:
                 return  jsonify({'message': 'BOARD_NOT_EXISTS'}), 404
 
-            article_list = (session
-                            .query(Article.id, Article.title, Article.create_at, User.full_name)
-                            .join(User, User.id == Article.uploader)
-                            .filter(Article.board_id == board_id, Article.is_deleted == False)
-                            .order_by(Article.create_at.asc())
-                            .all())
+            filter_list = [
+                {'model': 'Article', 'field': 'is_deleted', 'op': '==', 'value': False},
+                {'model': 'Article', 'field': 'board_id', 'op': '==', 'value': article_info['board_id']}
+            ]
+            if article_info.get('title', None):
+                filter_list.append(
+                    {'model': 'Article', 'field': 'title', 'op': 'like', 'value': '%' + article_info['title'] + '%'})
+
+            if article_info.get('uploader', None):
+                filter_list.append(
+                    {'model': 'Article', 'field': 'uploader', 'op': 'like', 'value': '%' + article_info['uploader'] + '%'})
+
+            article_query = (session
+                .query(Article.id, Article.title, User.full_name, Article.create_at, Article.updated_at, Article.is_deleted)
+                .join(User, User.id == Article.uploader))
+
+            article_list = apply_filters(article_query, filter_list).order_by(Article.create_at.desc()).slice(article_info['offset'], article_info['limit']).all()
 
             articles = [{
-                    'id': article[0],
-                    'title': article[1],
-                    'created_at': article[2],
-                    'author': article[3]
-                } for article in article_list]
+                'id': article[0],
+                'title': article[1],
+                'author': article[2],
+                'created_at': article[3],
+                'updated_at': article[4],
+                'is_deleted': article[5]
+            } for article in article_list]
 
         except Exception as e:
             print(e)
@@ -178,7 +199,7 @@ class BoardService:
                 print(e)
                 return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
 
-        return jsonify({'boards': articles}), 200
+        return articles
 
     def get_article_detail(self, article_info):
         try:
@@ -255,9 +276,8 @@ class BoardService:
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
-            print(article_info)
             uploader_db = session.query(Article.uploader).filter(Article.id == article_info['article_id']).one()[0]
-            print(uploader_db)
+
             if (uploader_db != article_info['modifier']) and (article_info['auth_type_id'] != 1):
                 return jsonify({'message': 'UNAUTHORIZED_ACTION'}), 403
 

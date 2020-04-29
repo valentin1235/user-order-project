@@ -1,10 +1,7 @@
-import json
-from datetime import datetime
-from flask import request, Blueprint, jsonify, g
+from flask import Blueprint, jsonify, g
 from flask_request_validator import (
     GET,
     PATH,
-    FORM,
     JSON,
     Param,
     Pattern,
@@ -40,10 +37,20 @@ class BoardView:
 
     @board_app.route("", methods=["GET"], endpoint='get_board_list')
     @login_required
-    def get_board_list():
+    @validate_params(
+        Param('offset', GET, int, required=False),
+        Param('limit', GET, int, required=False),
+        Param('name', GET, str, required=False)
+    )
+    def get_board_list(*args):
+        board_info = {
+            'offset': args[0] if args[0] else 0,
+            'limit': args[1] if args[1] else 10,
+            'name': args[2]
+        }
         board_service = BoardService()
-        result = board_service.get_board_list()
-        return result
+        boards = board_service.get_board_list(board_info)
+        return jsonify({'board_list': boards}), 200
 
     @board_app.route("/<int:board_id>", methods=["PUT"], endpoint='edit_board')
     @login_required
@@ -115,13 +122,23 @@ class BoardView:
     @board_app.route("/<int:board_id>", methods=["GET"], endpoint='get_article_list')
     @login_required
     @validate_params(
-        Param('board_id', PATH, int)
+        Param('board_id', PATH, int),
+        Param('offset', GET, int, required=False),
+        Param('limit', GET, int, required=False),
+        Param('title', GET, str, required=False),
+        Param('uploader', GET, str, required=False)
     )
     def get_article_list(*args):
-        board_id = args[0]
+        article_info = {
+            'board_id': args[0],
+            'offset': args[1] if args[1] else 0,
+            'limit': args[2] if args[2] else None,
+            'title': args[3],
+            'uploader': args[4]
+        }
         board_service = BoardService()
-        result = board_service.get_article_list(board_id)
-        return result
+        articles = board_service.get_article_list(article_info)
+        return jsonify({'article_list': articles}), 200
 
     @board_app.route("/<int:board_id>/<int:article_id>", methods=["GET"], endpoint='get_article_detail')
     @login_required
@@ -160,7 +177,6 @@ class BoardView:
         }
         board_service = BoardService()
         result = board_service.edit_article(article_info)
-
         return result
 
     @board_app.route("/<int:board_id>/<int:article_id>", methods=["DELETE"], endpoint='delete_article')
@@ -178,6 +194,7 @@ class BoardView:
             'modifier': user_info['user_id'],
             'auth_type_id': user_info['auth_type_id']
         }
+
         if args[2] == 1:
             article_info['is_deleted'] = True
         else:
@@ -185,5 +202,30 @@ class BoardView:
 
         board_service = BoardService()
         result = board_service.delete_article(article_info)
-
         return result
+
+    @board_app.route("/recent-articles", methods=["GET"], endpoint='get_recent_board_article')
+    @login_required
+    @validate_params(
+        Param('offset', GET, int, required=False),
+        Param('limit', GET, int, required=False),
+    )
+    def get_recent_board_article(*args):
+        board_info = {
+            'offset': 0,
+            'limit': None
+        }
+        board_service = BoardService()
+        board_list = board_service.get_board_list(board_info)
+
+        for board in board_list:
+            board_service = BoardService()
+            article_info = {
+                'board_id': board['id'],
+                'offset': args[0] if args[0] else 0,
+                'limit': args[1] if args[1] else 2
+            }
+            article_list = board_service.get_article_list(article_info)
+            board['recent_article_list'] = article_list
+
+        return jsonify({'dashboard': board_list})
