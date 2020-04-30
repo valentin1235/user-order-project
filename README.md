@@ -1,6 +1,6 @@
 # Project Introduction
 
-Simple board and article CRUD features. 
+Simple board and article create, read, update and delete project. 
 
 + Project Period  : 5 days
 
