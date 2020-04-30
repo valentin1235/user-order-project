@@ -7,7 +7,10 @@ from config import DATABASES
 from user.user_dao import User
 
 Base = declarative_base()
-engine = create_engine(f'postgresql://{DATABASES["user"]}:{DATABASES["password"]}@{DATABASES["host"]}/{DATABASES["database"]}', echo=True)
+engine = create_engine(
+    f'postgresql://{DATABASES["user"]}:{DATABASES["password"]}@{DATABASES["host"]}/{DATABASES["database"]}',
+    echo=True
+)
 
 
 class Board(Base):

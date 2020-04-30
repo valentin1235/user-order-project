@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from flask import Flask
 from flask_cors import CORS
+from flask_redis import FlaskRedis
 from flask.json import JSONEncoder
 from user.user_view import UserView
 from board.board_view import BoardView
@@ -65,6 +66,8 @@ def create_app():
     app.json_encoder = CustomJSONEncoder
     app.config['DEBUG'] = True
     CORS(app, resources={r"/*/*": {"origins": "*"}})
+    flask_redis = FlaskRedis(app)
+    flask_redis.init_app(app)
     app.register_blueprint(UserView.user_app)
     app.register_blueprint(BoardView.board_app)
 

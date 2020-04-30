@@ -1,16 +1,19 @@
 import bcrypt, jwt
 from datetime import datetime, timedelta
 
-from .user_dao import engine, User
+from .user_dao import User
+from connection import get_db_connection
+
 from config import SECRET
 
-from flask import jsonify, g
+from flask import jsonify
 from sqlalchemy import exists
 from sqlalchemy.orm import sessionmaker
 
 
 class UserService:
     def sigh_up(self, user_info):
+        engine = get_db_connection()
         user = User()
 
         try:
@@ -44,19 +47,25 @@ class UserService:
         return jsonify({'token': token}), 200
 
     def sign_in(self, user_info):
+        engine = get_db_connection()
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
-            user_info_db = session.query(User.password, User.id).filter(User.email == user_info['email']).one()
 
-            if session.query(exists().where(User.email == user_info['email'])).one()[0]:
-                if bcrypt.checkpw(user_info['password'].encode('utf-8'),
-                                  user_info_db[0].encode('utf-8')):
-                    token = jwt.encode({'id': user_info_db[1],
-                                'exp': datetime.utcnow() + timedelta(days=6)},
-                                SECRET['secret_key'], algorithm=SECRET['algorithm'])
+            user_info_db = session.query(User.password, User.id).filter(User.email == user_info['email']).all()
 
-            session.commit()
+            if len(user_info_db) == 0:
+                return jsonify({'message': 'USER_NOT_EXISTS'}), 400
+
+            # if session.query(exists().where(User.email == user_info['email'])).one()[0]:
+            elif bcrypt.checkpw(user_info['password'].encode('utf-8'),
+                              user_info_db[0][0].encode('utf-8')):
+                token = jwt.encode({'id': user_info_db[0][1],
+                    'exp': datetime.utcnow() + timedelta(days=6)},
+                    SECRET['secret_key'], algorithm=SECRET['algorithm'])
+
+                return jsonify({'token': token}), 200
+            return jsonify({'message': 'INVALID_REQUEST'}), 401
 
         except Exception as e:
             print(e)
@@ -68,5 +77,3 @@ class UserService:
             except Exception as e:
                 print(e)
                 return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
-
-        return jsonify({'token': token}), 200

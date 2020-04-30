@@ -6,7 +6,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from config import DATABASES
 
 Base = declarative_base()
-engine = create_engine(f'postgresql://{DATABASES["user"]}:{DATABASES["password"]}@{DATABASES["host"]}/{DATABASES["database"]}', echo=True)
+engine = create_engine(
+    f'postgresql://{DATABASES["user"]}:{DATABASES["password"]}@{DATABASES["host"]}/{DATABASES["database"]}',
+    echo=True
+)
 
 
 class AuthType(Base):

@@ -1,5 +1,6 @@
 from flask import jsonify, g
-from .board_dao import engine, Board, Article
+from .board_dao import Board, Article
+from connection import get_db_connection
 from user.user_dao import User
 from sqlalchemy import exists
 from sqlalchemy.orm import sessionmaker
@@ -9,6 +10,8 @@ from sqlalchemy_filters import apply_filters
 class BoardService:
     def make_board(self, board_info):
         board = Board()
+        engine = get_db_connection()
+
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
@@ -31,6 +34,7 @@ class BoardService:
         return jsonify({'message': 'SUCCESS'}), 200
 
     def get_board_list(self, board_info):
+        engine = get_db_connection()
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
@@ -65,6 +69,7 @@ class BoardService:
         return boards
 
     def edit_board(self, board_info):
+        engine = get_db_connection()
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
@@ -92,6 +97,7 @@ class BoardService:
         return jsonify({'message': 'SUCCESS'}), 200
 
     def delete_board(self, board_info):
+        engine = get_db_connection()
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
@@ -126,6 +132,7 @@ class BoardService:
 
     def make_article(self, article_info):
         article = Article()
+        engine = get_db_connection()
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
@@ -154,6 +161,7 @@ class BoardService:
         return jsonify({'message': 'SUCCESS'}), 200
 
     def get_article_list(self, article_info):
+        engine = get_db_connection()
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
@@ -202,6 +210,7 @@ class BoardService:
         return articles
 
     def get_article_detail(self, article_info):
+        engine = get_db_connection()
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
@@ -239,11 +248,12 @@ class BoardService:
         return jsonify({'boards': article_detail}), 200
 
     def edit_article(self, article_info):
+        engine = get_db_connection()
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
             uploader_db = session.query(Article.uploader).filter(Article.id == article_info['article_id']).one()[0]
-            if (uploader_db != article_info['modifier']) and (article_info['auth_type_id'] != 1):
+            if uploader_db != article_info['modifier']:
                 return jsonify({'message': 'UNAUTHORIZED_ACTION'}), 403
 
             if session.query(Board.is_deleted).filter(Board.id == article_info['board_id']).one()[0]:
@@ -273,6 +283,7 @@ class BoardService:
         return jsonify({'message': 'SUCCESS'}), 200
 
     def delete_article(self, article_info):
+        engine = get_db_connection()
         try:
             Session = sessionmaker(bind=engine)
             session = Session()

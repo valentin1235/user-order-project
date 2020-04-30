@@ -1,11 +1,7 @@
-import json
-from datetime import datetime
-
 from flask import request, Blueprint, jsonify, g
 from flask_request_validator import (
     GET,
     PATH,
-    FORM,
     JSON,
     Param,
     Pattern,
@@ -15,7 +11,6 @@ from flask_request_validator import (
 )
 
 from .user_service import UserService
-from utils import login_required
 
 
 class UserView:

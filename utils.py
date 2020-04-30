@@ -1,4 +1,5 @@
 import jwt
+from psycopg2 import OperationalError
 from sqlalchemy.orm import sessionmaker
 from flask import request, jsonify, g
 from user.user_dao import User, engine
@@ -30,11 +31,11 @@ def login_required(func):
                     return jsonify({'message': 'ACCOUNT_DOES_NOT_EXIST'}), 404
 
                 except TypeError:
-                    return jsonify({'message': 'CHECK_TYPE'}), 400
+                    return jsonify({'message': 'NON_EXISTS'}), 400
 
                 except Exception as e:
                     print(e)
-                    return jsonify({'message': e}), 500
+                    return jsonify({'message': e}), 400
 
                 finally:
                     try:
