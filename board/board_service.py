@@ -1,8 +1,8 @@
-from flask import jsonify
 from .board_dao import Board, Article
 from connection import get_db_connection
 from user.user_dao import User
-from sqlalchemy import exists
+
+from flask import jsonify
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_filters import apply_filters
 

@@ -1,11 +1,10 @@
 import bcrypt, jwt, uuid
-from datetime import datetime, timedelta
 
 from .user_dao import User, RandomKey
 from connection import get_db_connection, get_redis_connection
-
 from config import SECRET
 
+from datetime import datetime, timedelta
 from flask import jsonify
 from sqlalchemy import exists
 from sqlalchemy.orm import sessionmaker

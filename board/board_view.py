@@ -4,7 +4,6 @@ from flask_request_validator import (
     PATH,
     JSON,
     Param,
-    Pattern,
     MaxLength,
     validate_params
 )

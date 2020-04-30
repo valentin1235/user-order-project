@@ -1,5 +1,4 @@
 import jwt
-from psycopg2 import OperationalError
 from sqlalchemy.orm import sessionmaker
 from flask import request, jsonify, g
 from user.user_dao import User, engine
@@ -9,15 +8,13 @@ from config import SECRET
 def login_required(func):
     def wrapper(*args, **kwargs):
         access_token = request.headers.get('Authorization', None)
-        print(access_token)
 
         if access_token:
             try:
                 payload = jwt.decode(access_token, SECRET['secret_key'], algorithm=SECRET['algorithm'])
-                print(payload)
                 id = payload['id']
-
                 Session = sessionmaker(bind=engine)
+
                 try:
                     session = Session()
                     user_info_db = session.query(User.auth_type_id, User.is_deleted).filter(User.id == payload['id']).one()

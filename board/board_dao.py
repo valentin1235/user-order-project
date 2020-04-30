@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine
 from sqlalchemy import Column, DateTime, Integer, String, Text, ForeignKey, Boolean
-from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 from config import DATABASES
