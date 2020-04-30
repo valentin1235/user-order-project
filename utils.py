@@ -9,10 +9,12 @@ from config import SECRET
 def login_required(func):
     def wrapper(*args, **kwargs):
         access_token = request.headers.get('Authorization', None)
+        print(access_token)
 
         if access_token:
             try:
                 payload = jwt.decode(access_token, SECRET['secret_key'], algorithm=SECRET['algorithm'])
+                print(payload)
                 id = payload['id']
 
                 Session = sessionmaker(bind=engine)

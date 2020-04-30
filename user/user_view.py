@@ -9,7 +9,6 @@ from flask_request_validator import (
     MinLength,
     validate_params
 )
-
 from .user_service import UserService
 
 
@@ -54,4 +53,20 @@ class UserView:
         }
         user_service = UserService()
         result = user_service.sign_in(user_info)
+        return result
+
+    @user_app.route("/log-out", methods=["POST"], endpoint='log_out')
+    @validate_params(
+        Param('key', JSON, str),
+        Param('token', JSON, str)
+    )
+    def log_out(*args):
+        token_info = {
+            'key': args[0],
+            'token': args[1]
+        }
+
+        user_service = UserService()
+        result = user_service.log_out(token_info)
+
         return result

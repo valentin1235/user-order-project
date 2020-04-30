@@ -31,7 +31,12 @@ class User(Base):
     updated_at = Column('updated_at', DateTime(timezone=True), onupdate=func.now())
     is_deleted = Column('is_deleted', Boolean(), default=False)
 
-    # auth_type = relationship(AuthType, foreign_key=[auth_type_id])
+
+class RandomKey(Base):
+    __tablename__ = 'random_keys'
+
+    id = Column('id', Integer(), primary_key=True, autoincrement=True, nullable=False)
+    key = Column('key', String(50), nullable=False)
 
 # Base.metadata.create_all(bind=engine)
 
