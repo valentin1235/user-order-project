@@ -31,7 +31,7 @@ Simple board and article CRUD features.
 + Bcrypt       : password hashing
 + JWT          : token generating
 
-# API Documentation(Backend)
+# API Documentation
 + [Boards & Articles](https://documenter.getpostman.com/view/10893095/SzmYA237?version=latest)
 
 # Database Modeling
