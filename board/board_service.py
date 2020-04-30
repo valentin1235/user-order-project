@@ -1,4 +1,4 @@
-from flask import jsonify, g
+from flask import jsonify
 from .board_dao import Board, Article
 from connection import get_db_connection
 from user.user_dao import User
@@ -19,6 +19,7 @@ class BoardService:
             board.name = board_info['name']
             session.add(board)
             session.commit()
+            return jsonify({'message': 'SUCCESS'}), 200
 
         except Exception as e:
             print(e)
@@ -31,10 +32,9 @@ class BoardService:
                     print(e)
                     return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
 
-        return jsonify({'message': 'SUCCESS'}), 200
-
     def get_board_list(self, board_info):
         engine = get_db_connection()
+
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
@@ -54,6 +54,7 @@ class BoardService:
                     'uploader': board[2],
                     'created_at': board[3]
                 } for board in board_list]
+            return boards
 
         except Exception as e:
             print(e)
@@ -66,13 +67,13 @@ class BoardService:
                 print(e)
                 return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
 
-        return boards
-
     def edit_board(self, board_info):
         engine = get_db_connection()
+
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
+
             if session.query(Board.is_deleted).filter(Board.id == board_info['board_id']).one()[0]:
                 return jsonify({'message': 'BOARD_NOT_EXISTS'}), 404
 
@@ -82,22 +83,22 @@ class BoardService:
              .update({'name': board_info['new_name'], 'modifier': board_info['modifier']}))
 
             session.commit()
+            return jsonify({'message': 'SUCCESS'}), 200
 
         except Exception as e:
             print(e)
             return jsonify({'message': e}), 500
 
         finally:
-                try:
-                    session.close()
-                except Exception as e:
-                    print(e)
-                    return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
-
-        return jsonify({'message': 'SUCCESS'}), 200
+            try:
+                session.close()
+            except Exception as e:
+                print(e)
+                return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
 
     def delete_board(self, board_info):
         engine = get_db_connection()
+
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
@@ -116,23 +117,23 @@ class BoardService:
              .update({'is_deleted': board_info['is_deleted'], 'modifier': board_info['modifier']}))
 
             session.commit()
+            return jsonify({'message': 'SUCCESS'}), 200
 
         except Exception as e:
             print(e)
             return jsonify({'message': e}), 500
 
         finally:
-                try:
-                    session.close()
-                except Exception as e:
-                    print(e)
-                    return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
-
-        return jsonify({'message': 'SUCCESS'}), 200
+            try:
+                session.close()
+            except Exception as e:
+                print(e)
+                return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
 
     def make_article(self, article_info):
         article = Article()
         engine = get_db_connection()
+
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
@@ -146,22 +147,22 @@ class BoardService:
             article.content = article_info['content']
             session.add(article)
             session.commit()
+            return jsonify({'message': 'SUCCESS'}), 200
 
         except Exception as e:
             print(e)
             return jsonify({'message': e}), 500
 
         finally:
-                try:
-                    session.close()
-                except Exception as e:
-                    print(e)
-                    return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
-
-        return jsonify({'message': 'SUCCESS'}), 200
+            try:
+                session.close()
+            except Exception as e:
+                print(e)
+                return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
 
     def get_article_list(self, article_info):
         engine = get_db_connection()
+
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
@@ -176,7 +177,6 @@ class BoardService:
             if article_info.get('title', None):
                 filter_list.append(
                     {'model': 'Article', 'field': 'title', 'op': 'like', 'value': '%' + article_info['title'] + '%'})
-
             if article_info.get('uploader', None):
                 filter_list.append(
                     {'model': 'Article', 'field': 'uploader', 'op': 'like', 'value': '%' + article_info['uploader'] + '%'})
@@ -195,6 +195,7 @@ class BoardService:
                 'updated_at': article[4],
                 'is_deleted': article[5]
             } for article in article_list]
+            return articles
 
         except Exception as e:
             print(e)
@@ -207,10 +208,9 @@ class BoardService:
                 print(e)
                 return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
 
-        return articles
-
     def get_article_detail(self, article_info):
         engine = get_db_connection()
+
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
@@ -233,6 +233,7 @@ class BoardService:
                 'created_at': article_detail[2],
                 'updated_at': article_detail[3],
             }
+            return jsonify({'boards': article_detail}), 200
 
         except Exception as e:
             print(e)
@@ -245,10 +246,9 @@ class BoardService:
                 print(e)
                 return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
 
-        return jsonify({'boards': article_detail}), 200
-
     def edit_article(self, article_info):
         engine = get_db_connection()
+
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
@@ -258,7 +258,6 @@ class BoardService:
 
             if session.query(Board.is_deleted).filter(Board.id == article_info['board_id']).one()[0]:
                 return jsonify({'message': 'BOARD_NOT_EXISTS'}), 404
-
             if session.query(Article.is_deleted).filter(Article.id == article_info['article_id']).one()[0]:
                 return  jsonify({'message': 'ARTICLE_NOT_EXISTS'}), 404
 
@@ -268,6 +267,7 @@ class BoardService:
              .update({'title': article_info['new_title'], 'content': article_info['new_content'], 'modifier': article_info['modifier']}))
 
             session.commit()
+            return jsonify({'message': 'SUCCESS'}), 200
 
         except Exception as e:
             print(e)
@@ -280,21 +280,18 @@ class BoardService:
                 print(e)
                 return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
 
-        return jsonify({'message': 'SUCCESS'}), 200
-
     def delete_article(self, article_info):
         engine = get_db_connection()
+
         try:
             Session = sessionmaker(bind=engine)
             session = Session()
             uploader_db = session.query(Article.uploader).filter(Article.id == article_info['article_id']).one()[0]
-
             if (uploader_db != article_info['modifier']) and (article_info['auth_type_id'] != 1):
                 return jsonify({'message': 'UNAUTHORIZED_ACTION'}), 403
 
             if session.query(Board.is_deleted).filter(Board.id == article_info['board_id']).one()[0]:
                 return jsonify({'message': 'BOARD_NOT_EXISTS'}), 404
-
             if session.query(Article.is_deleted).filter(Article.id == article_info['article_id']).one()[0]:
                 return  jsonify({'message': 'ARTICLE_NOT_EXISTS'}), 404
 
@@ -304,6 +301,7 @@ class BoardService:
              .update({'is_deleted': article_info['is_deleted'], 'modifier': article_info['modifier']}))
 
             session.commit()
+            return jsonify({'message': 'SUCCESS'}), 200
 
         except Exception as e:
             print(e)
@@ -315,5 +313,3 @@ class BoardService:
             except Exception as e:
                 print(e)
                 return jsonify({'message': 'SESSION_CLOSE_ERROR'}), 500
-
-        return jsonify({'message': 'SUCCESS'}), 200

@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from config import DATABASES
 
@@ -37,7 +36,5 @@ class RandomKey(Base):
 
     id = Column('id', Integer(), primary_key=True, autoincrement=True, nullable=False)
     key = Column('key', String(50), nullable=False)
-
-# Base.metadata.create_all(bind=engine)
 
 

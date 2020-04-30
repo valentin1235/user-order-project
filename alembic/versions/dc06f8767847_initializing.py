@@ -68,6 +68,12 @@ def upgrade():
         sa.PrimaryKeyConstraint('id')
     )
 
+    op.create_table(
+        'random_keys',
+        sa.Column('id', sa.Integer, primary_key=True, autoincrement=True, nullable=False),
+        sa.Column('key', sa.String(50), nullable=False),
+    )
+
 
 def downgrade():
     pass

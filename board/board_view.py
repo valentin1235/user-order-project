@@ -56,8 +56,7 @@ class BoardView:
     @login_required
     @validate_params(
         Param('board_id', PATH, int),
-        Param('name', JSON, str,
-              rules=[MaxLength(20)])
+        Param('name', JSON, str, rules=[MaxLength(20)])
     )
     def edit_board(*args):
         user_info = g.user_info
@@ -88,6 +87,7 @@ class BoardView:
             'modifier': user_info['user_id'],
             'board_id': args[0],
         }
+
         if args[1] == 1:
             board_info['is_deleted'] = True
         else:
@@ -108,7 +108,6 @@ class BoardView:
     )
     def make_article(*args):
         user_info = g.user_info
-
         article_info = {
             'board_id': args[0],
             'uploader': user_info['user_id'],

@@ -1,7 +1,5 @@
-from flask import request, Blueprint, jsonify, g
+from flask import Blueprint
 from flask_request_validator import (
-    GET,
-    PATH,
     JSON,
     Param,
     Pattern,
@@ -65,8 +63,6 @@ class UserView:
             'key': args[0],
             'token': args[1]
         }
-
         user_service = UserService()
         result = user_service.log_out(token_info)
-
         return result
