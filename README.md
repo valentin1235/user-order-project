@@ -4,7 +4,7 @@ Simple board and article CRUD features.
 
 + Project Period  : 5 days
 
-+ Members         : (back) Heechul Yoon
++ Member         : (back) Heechul Yoon
          
 
 # Features
