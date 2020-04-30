@@ -1,4 +1,4 @@
-# Backend Part Introduction
+# Project Introduction
 
 Simple board and article CRUD features. 
 
