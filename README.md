@@ -144,4 +144,4 @@ Simple board and article create, read, update and delete project.
 + [Boards & Articles](https://documenter.getpostman.com/view/10893095/SzmYA237?version=latest)
 
 # Database Modeling
-![ERD](https://media.vlpt.us/images/valentin123/post/d68100c8-032a-47ba-9e73-1d32b0980bef/Board_and_Article_20200501_06_32.png)
+![ERD](https://brandi-intern.s3.ap-northeast-2.amazonaws.com/Board_and_Article.png)
