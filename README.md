@@ -30,7 +30,7 @@ Simple board and article create, read, update and delete project.
 
 + Project Period  : 5 days
 
-+ Member         : (back) Heechul Yoon
++ Member         : (backend) Heechul Yoon
          
 
 # Features
