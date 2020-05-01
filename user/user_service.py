@@ -34,7 +34,6 @@ class UserService:
             random_name = str(uuid.uuid4())
             random_key.key = random_name
             session.add(random_key)
-            session.commit()
 
             token = jwt.encode({'id': user.id,
                                 'exp': datetime.utcnow() + timedelta(days=6)},
@@ -42,6 +41,9 @@ class UserService:
 
             # store key and token in redis
             redis_connection.set(random_name, token)
+
+            # commit session after all tasks done
+            session.commit()
 
             return jsonify({random_name: token}), 200
 
@@ -77,10 +79,12 @@ class UserService:
                 random_name = str(uuid.uuid4())
                 random_key.key = random_name
                 session.add(random_key)
-                session.commit()
 
                 # store key and token in redis
                 redis_connection.set(random_name, token)
+
+                # commit session after all tasks done
+                session.commit()
 
                 return jsonify({random_name: token}), 200
             return jsonify({'message': 'INVALID_REQUEST'}), 401
