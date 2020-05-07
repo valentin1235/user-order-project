@@ -16,6 +16,8 @@ class UserDao:
         try:
             with db_connection.cursor() as db_cursor:
 
+                # accounts 생성
+                # 계정 INSERT 문
                 insert_user_accounts_statement = """
                     INSERT INTO user_accounts(
                         email,
@@ -25,8 +27,10 @@ class UserDao:
                         %(password)s
                     )"""
 
+                # 데이터 sql 명령문과 셀러 데이터 바인딩
                 db_cursor.execute(insert_user_accounts_statement, user_info)
 
+                # 위에서 생성된 새로운 계정의 id 값을 가져옴
                 user_account_id = db_cursor.lastrowid
                 user_info['user_account_id'] = user_account_id
 
@@ -52,7 +56,7 @@ class UserDao:
                 db_connection.commit()
 
             if user_info['user_account_id']:
-                token = jwt.encode({'user_account_id': user_info['user_account_id'],
+                token = jwt.encode({'id': user_info['user_account_id'],
                                     'exp': datetime.utcnow() + timedelta(days=6)},
                                    SECRET['secret_key'], algorithm=SECRET['algorithm'])
                 random_key = self.gen_random_name()
@@ -312,32 +316,4 @@ class UserDao:
             print(f'DATABASE_CURSOR_ERROR_WITH {e}')
             return jsonify({'message': 'DB_CURSOR_ERROR'}), 500
 
-    def get_cart_info(self, cart_info, db_connection):
-        try:
-            with db_connection.cursor() as db_cursor:
-                db_cursor.execute("""
-                    SELECT 
-                        (select id from orders where products.id = orders.product_id order by created_at limit 1) as order_id,
-                        (select created_at from orders where products.id = orders.product_id order by created_at limit 1) as created_at,
-                        (select COUNT(0) from orders where products.id = orders.product_id) as units,
-                        products.id AS product_id,
-                        products.name AS product_name    
-                    FROM carts
-                    RIGHT JOIN orders ON carts.id = orders.cart_id 
-                    LEFT JOIN products ON products.id = orders.product_id
-                    WHERE carts.is_checked_out = 0
-                    AND carts.user_account_id = %(user_account_id)s
-                    GROUP BY orders.product_id
-                    LIMIT %(limit)s OFFSET %(offset)s
-                """, cart_info)
 
-                cart_product_list = db_cursor.fetchall()
-                return jsonify({'my_cart': cart_product_list}), 200
-
-        except KeyError as e:
-            print(f'KEY_ERROR WITH {e}')
-            return jsonify({'message': 'INVALID_KEY'}), 500
-
-        except Error as e:
-            print(f'DATABASE_CURSOR_ERROR_WITH {e}')
-            return jsonify({'message': 'DB_CURSOR_ERROR'}), 500

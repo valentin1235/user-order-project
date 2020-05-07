@@ -5,6 +5,12 @@
 .idea/**/dictionaries
 .idea/**/shelf
 
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+
 # virtualenv
 .venv01/
 venv01/

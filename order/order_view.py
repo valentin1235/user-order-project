@@ -19,11 +19,11 @@ from connection import get_db_connection, DatabaseConnection, get_redis_connecti
 from utils import login_required
 
 
-class UserView:
+class OrderView:
 
-    user_app = Blueprint('user_app', __name__, url_prefix='/user')
+    order_app = Blueprint('order_app', __name__, url_prefix='')
 
-    @user_app.route('', methods=['POST'], endpoint='sign_up')
+    @order_app.route('', methods=['POST'], endpoint='sign_up')
     @validate_params(
         Param('email', JSON, str,
               rules=[Pattern(r'^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$')]),
@@ -247,34 +247,4 @@ class UserView:
             except Exception as e:
                 return jsonify({'message': f'{e}'}), 500
 
-    @user_app.route('/my-cart', methods=['GET'], endpoint='get_my_cart')
-    @login_required
-    @validate_params(
-        Param('offset', GET, int, required=False),
-        Param('limit', GET, int, required=False)
-    )
-    def get_my_cart(*args):
-        user = g.account_info
-        cart_info = {
-            'user_account_id': user.get('user_account_id', None),
-            'offset': args[0] if args[0] else 0,
-            'limit': args[1] if args[1] else 10
-        }
 
-        try:
-            db_connection = get_db_connection()
-            if db_connection:
-                user_service = UserService()
-                get_my_cart_result = user_service.get_my_cart(cart_info, db_connection)
-                return get_my_cart_result
-            else:
-                return jsonify({'message': 'NO_DATABASE_CONNECTION'}), 500
-
-        except Exception as e:
-            return jsonify({'message': f'{e}'}), 500
-
-        finally:
-            try:
-                db_connection.close()
-            except Exception as e:
-                return jsonify({'message': f'{e}'}), 500

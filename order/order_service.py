@@ -98,12 +98,3 @@ class UserService:
 
         except Exception as e:
             return jsonify({'message': f'{e}'}), 500
-
-    def get_my_cart(self, cart_info, db_connection):
-        user_dao = UserDao()
-        try:
-            get_my_cart_result = user_dao.get_cart_info(cart_info, db_connection)
-            return get_my_cart_result
-
-        except Exception as e:
-            return jsonify({'message': f'{e}'}), 500
