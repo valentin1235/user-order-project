@@ -190,20 +190,24 @@ class UserView:
             except Exception as e:
                 return jsonify({'message': f'{e}'}), 500
 
-    @user_app.route('/<int:user_id>', methods=['GET'], endpoint='get_user_info')
+    @user_app.route('/<int:user_id>/<int:receipt_id>', methods=['GET'], endpoint='get_user_info')
     @login_required
     @validate_params(
-        Param('user_id', PATH, int)
+        Param('user_id', PATH, int),
+        Param('receipt_id', PATH, int)
     )
     def get_user_info(*args):
         user = g.account_info
-        target_user_id = {'target_user_id': args[0]}
+        target_user_info = {
+            'user_account_id': args[0],
+            'receipt_id': args[1]
+        }
 
         try:
             db_connection = get_db_connection()
             if db_connection:
                 user_service = UserService()
-                getting_seller_info_result = user_service.get_user_info(target_user_id, user, db_connection)
+                getting_seller_info_result = user_service.get_user_info(target_user_info, user, db_connection)
                 return getting_seller_info_result
 
             else:
@@ -308,26 +312,24 @@ class UserView:
             except Exception as e:
                 return jsonify({'message': f'{e}'}), 500
 
-    @user_app.route('/my-cart/order', methods=['GET'], endpoint='get_order_receipt')
+    @user_app.route('/my-cart/order', methods=['GET'], endpoint='get_my_order_receipt')
     @login_required
     @validate_params(
         Param('receipt_id', GET, int),
         Param('checked_out_cart_id', GET, int)
     )
-    def get_order_receipt(*args):
+    def get_my_order_receipt(*args):
         user = g.account_info
         receipt_info = {
             'receipt_id': args[0],
             'checked_out_cart_id': args[1],
             'user_account_id': user.get('user_account_id', None),
-            'offset': 0,
-            'limit': 10
         }
         try:
             db_connection = get_db_connection()
             if db_connection:
                 user_service = UserService()
-                get_order_receipt_result = user_service.get_order_receipt(receipt_info, db_connection)
+                get_order_receipt_result = user_service.get_my_order_receipt(receipt_info, db_connection)
                 return get_order_receipt_result
             else:
                 return jsonify({'message': 'NO_DATABASE_CONNECTION'}), 500

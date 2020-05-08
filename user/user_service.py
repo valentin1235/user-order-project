@@ -80,15 +80,35 @@ class UserService:
         user_list_result = user_dao.get_user_list(user_search_keywords, db_connection)
         return user_list_result
 
-    def get_user_info(self, target_user_id, user, db_connection):
+    def get_user_info(self, target_user_info, user, db_connection):
         user_dao = UserDao()
         account_auth_type_id = user['auth_type_id']
+        if account_auth_type_id != 1:
+            return jsonify({'message': 'UNAUTHORIZED'}), 403
+        user_info = user_dao.get_user_info(target_user_info, db_connection)
 
-        if account_auth_type_id == 1:
-            get_user_info_result = user_dao.get_user_info(target_user_id, db_connection)
-            return get_user_info_result
+        try:
+            with db_connection.cursor() as db_cursor:
+                db_cursor.execute("""
+                    select cart_id from receipts where id = %(receipt_id)s
+                """, target_user_info)
+                cart_id = db_cursor.fetchone()
+                print(cart_id)
+                if not cart_id:
+                    return jsonify({'message': 'INVALID_RECEIPT'}), 400
 
-        return jsonify({'message': 'NO_AUTHORIZATION'}), 400
+                target_user_info['checked_out_cart_id'] = cart_id.get('cart_id', None)
+                receipt_detail = user_dao.get_order_receipt(target_user_info, db_connection)
+                user_info['receipt_detail'] = receipt_detail
+                return jsonify({'user_info': user_info}), 200
+
+        except KeyError as e:
+            print(f'KEY_ERROR WITH {e}')
+            return jsonify({'message': 'INVALID_KEY'}), 500
+
+        except Exception as e:
+            print(e)
+            return jsonify({'message': f'{e}'}), 500
 
     def get_my_page(self, user_account_id, db_connection):
         user_dao = UserDao()
@@ -117,11 +137,11 @@ class UserService:
         except Exception as e:
             return jsonify({'message': f'{e}'}), 500
 
-    def get_order_receipt(self, receipt_info, db_connection):
+    def get_my_order_receipt(self, receipt_info, db_connection):
         user_dao = UserDao()
         try:
-            get_order_receipt_result = user_dao.get_order_receipt(receipt_info, db_connection)
-            return get_order_receipt_result
+            receipt_detail = user_dao.get_order_receipt(receipt_info, db_connection)
+            return jsonify({'receipt': receipt_detail}), 200
 
         except Exception as e:
             return jsonify({'message': f'{e}'}), 500

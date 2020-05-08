@@ -288,7 +288,7 @@ class UserDao:
                     FROM user_accounts AS ua
                     LEFT JOIN user_infos AS ui ON ua.id = ui.user_account_id
                     LEFT JOIN genders AS gd ON gd.id = ui.gender_id
-                    WHERE ua.id = %(target_user_id)s
+                    WHERE ua.id = %(user_account_id)s
                     AND ua.is_deleted = 0
                     AND ui.is_deleted = 0
                     AND ui.close_time = '2037-12-31 23:59:59'
@@ -431,7 +431,7 @@ class UserDao:
                     LEFT JOIN carts ON receipts.cart_id = carts.id
                     WHERE carts.id = %(checked_out_cart_id)s
                     AND receipts.id = %(receipt_id)s
-                    AND user_account_id = %(user_account_id)s
+                    AND receipts.user_account_id = %(user_account_id)s
                 ''', receipt_info)
                 receipt_detail = db_cursor.fetchone()
                 if not receipt_detail:
@@ -449,12 +449,11 @@ class UserDao:
                     AND carts.id = %(checked_out_cart_id)s
                     AND orders.is_checked_out = 1
                     GROUP BY orders.product_id
-                    LIMIT %(limit)s OFFSET %(offset)s
                 """, receipt_info)
                 order_list = db_cursor.fetchall()
                 receipt_detail['order_list'] = order_list
 
-                return jsonify({'receipt': receipt_detail}), 200
+                return receipt_detail
 
         except KeyError as e:
             print(f'KEY_ERROR WITH {e}')
@@ -463,3 +462,4 @@ class UserDao:
         except Error as e:
             print(f'DATABASE_CURSOR_ERROR_WITH {e}')
             return jsonify({'message': 'DB_CURSOR_ERROR'}), 500
+
