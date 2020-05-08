@@ -169,18 +169,20 @@ class UserDao:
     def get_user_list(self, user_search_keywords, db_connection):
         select_user_list_statement = '''
             SELECT 
-            ua.id as user_id,
-            ua.email as email,
-            ua.created_at as created_at,
-            ui.name as name,
-            ui.nick_name as nick_name,
-            ui.contact_number as contact_number,
-            gd.gender as gender
-            FROM user_infos as ui
-            right JOIN user_accounts as ua ON ua.id = ui.user_account_id
-            LEFT JOIN genders as gd ON gd.id = ui.gender_id
-            WHERE ui.close_time = '2037-12-31 23:59:59.0'
-            AND ui.is_deleted = 0
+                ua.id as user_account_id, 
+                ua.email,
+                ua.created_at as user_signed_up_date,
+                (select gd.gender from user_infos as ui left join genders as gd on gd.id = ui.gender_id where ui.user_account_id = ua.id and close_time = '2037-12-31 23:59:59') as gender,
+                (select name from user_infos as ui where ui.user_account_id = ua.id and close_time = '2037-12-31 23:59:59') as user_name,
+                (select nick_name from user_infos as ui where ui.user_account_id = ua.id and close_time = '2037-12-31 23:59:59') as user_nick_name,
+                (select id from receipts as rt where rt.user_account_id = ua.id order by created_at DESC limit 1) as recent_receipt_id,
+                (select order_number from receipts as rt where rt.user_account_id = ua.id order by created_at DESC limit 1) as recent_order_number,
+                (select created_at from receipts as rt where rt.user_account_id = ua.id order by created_at DESC limit 1) as recent_order_date
+            FROM user_accounts as ua
+            LEFT JOIN user_infos as ui on ua.id = ui.user_account_id
+            LEFT JOIN carts as ct on ua.id = ct.user_account_id 
+            LEFT JOIN receipts as rt on ua.id = rt.user_account_id
+            WHERE ui.is_deleted = 0
             AND ua.is_deleted = 0
             AND ua.auth_type_id = 2
         '''
@@ -235,8 +237,9 @@ class UserDao:
             select_user_list_statement += " AND ua.created_at > %(start_time)s AND ua.created_at < %(close_time)s"
             filter_query_values_count_statement += " AND user_accounts.created_at > %(start_time)s AND user_accounts.created_at < %(close_time)s"
 
-        # sql 명령문에 키워드 추가가 완료되면 정렬, limit, offset 쿼리문을 추가해준다.
-        select_user_list_statement += " ORDER BY ui.user_account_id DESC LIMIT %(limit)s OFFSET %(offset)s"
+        # sql 명령문에 키워드 추가가 완료되면 group by, 정렬, limit, offset 쿼리문을 추가해준다.
+        select_user_list_statement += " GROUP BY ua.id"
+        select_user_list_statement += " ORDER BY ua.created_at DESC LIMIT %(limit)s OFFSET %(offset)s"
 
         try:
             with db_connection as db_cursor:
@@ -365,8 +368,12 @@ class UserDao:
 
                 # check existence of the cart matching to user_account_id
                 db_cursor.execute('''
-                    SELECT 
-                    EXISTS(SELECT id FROM carts WHERE id = %(cart_id)s AND is_checked_out = 0) as existence
+                    SELECT EXISTS(
+                    SELECT id 
+                    FROM carts 
+                    WHERE id = %(cart_id)s 
+                    AND is_checked_out = 0 
+                    AND user_account_id = %(user_account_id)s) as existence
                 ''', order_info)
                 if db_cursor.fetchone().get('existence', None) == 0:
                     return jsonify({'message': 'CART_NOT_EXISTS'}), 404
@@ -385,15 +392,17 @@ class UserDao:
                     WHERE cart_id = %(cart_id)s
                 """, order_info)
 
-                # make an order
+                # make an order receipt
                 db_cursor.execute("""
                     INSERT INTO receipts
                     (
                         cart_id,
-                        order_number
+                        order_number,
+                        user_account_id
                     ) VALUES (
                         %(cart_id)s,
-                        %(order_number)s
+                        %(order_number)s,
+                        $(user_account_id)s
                     )
                 """, order_info)
 

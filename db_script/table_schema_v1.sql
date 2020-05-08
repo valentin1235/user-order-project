@@ -175,10 +175,11 @@ ALTER TABLE orders
 -- receipts Table Create SQL
 CREATE TABLE receipts
 (
-    `id`            INT            NOT NULL    AUTO_INCREMENT COMMENT 'PK', 
-    `cart_id`       INT            NOT NULL    COMMENT 'cart FK', 
-    `order_number`  VARCHAR(45)    NOT NULL    COMMENT '주문번호', 
-    `created_at`    DATETIME       NULL        DEFAULT CURRENT_TIMESTAMP COMMENT '결제일시', 
+    `id`               INT            NOT NULL    AUTO_INCREMENT COMMENT 'PK',
+    `user_account_id`  INT            NOT NULL    COMMENT '유저 계정 FK', 
+    `cart_id`          INT            NOT NULL    COMMENT 'cart FK', 
+    `order_number`     VARCHAR(45)    NOT NULL    COMMENT '주문번호', 
+    `created_at`       DATETIME       NULL        DEFAULT CURRENT_TIMESTAMP COMMENT '결제일시', 
     PRIMARY KEY (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT '결제된 주문번호 관리';
 
@@ -186,6 +187,9 @@ ALTER TABLE receipts
     ADD CONSTRAINT FK_receipts_cart_id_carts_id FOREIGN KEY (cart_id)
         REFERENCES carts (id) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
+ALTER TABLE receipts
+    ADD CONSTRAINT FK_receipts_user_account_id_user_accounts_id FOREIGN KEY (user_account_id)
+        REFERENCES user_accounts (id) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 -- master token 6days : eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2FjY291bnRfaWQiOjEsImV4cCI6MTU4OTQzODM3MX0.vSHevnWPxXulMBL2Opjz_JdRe8gwJX2CA2G5syCQJpU
 -- user1 token 6days : eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2FjY291bnRfaWQiOjIsImV4cCI6MTU4OTQzODQ2M30.qn60pQdQnHELqXqb4WjrAh25_v208KkkIbDk4ir7I1M
