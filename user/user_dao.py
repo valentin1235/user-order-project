@@ -315,24 +315,137 @@ class UserDao:
     def get_cart_info(self, cart_info, db_connection):
         try:
             with db_connection.cursor() as db_cursor:
+
+                # get recent cart id
+                db_cursor.execute("""
+                    SELECT id 
+                    FROM carts 
+                    WHERE user_account_id = %(user_account_id)s
+                    AND is_checked_out = 0
+                """, cart_info)
+
+                recent_cart_id = db_cursor.fetchone()
+                if not recent_cart_id:
+                    return ({'message': 'CART_NOT_EXISTS'}), 404
+                cart_id = recent_cart_id.get('id', None)
+                cart_info['cart_id'] = cart_id
+
+                # get product information in a cart
                 db_cursor.execute("""
                     SELECT 
                         (select id from orders where products.id = orders.product_id order by created_at limit 1) as order_id,
                         (select created_at from orders where products.id = orders.product_id order by created_at limit 1) as created_at,
-                        (select COUNT(0) from orders where products.id = orders.product_id) as units,
+                        (select COUNT(0) from orders where products.id = orders.product_id and carts.id = orders.cart_id) as units,
                         products.id AS product_id,
                         products.name AS product_name    
                     FROM carts
                     RIGHT JOIN orders ON carts.id = orders.cart_id 
                     LEFT JOIN products ON products.id = orders.product_id
                     WHERE carts.is_checked_out = 0
-                    AND carts.user_account_id = %(user_account_id)s
+                    AND carts.id = %(cart_id)s
+                    AND orders.is_checked_out = 0
                     GROUP BY orders.product_id
                     LIMIT %(limit)s OFFSET %(offset)s
                 """, cart_info)
 
                 cart_product_list = db_cursor.fetchall()
-                return jsonify({'my_cart': cart_product_list}), 200
+                return jsonify({'cart_products': cart_product_list, 'cart_id': cart_id}), 200
+
+        except KeyError as e:
+            print(f'KEY_ERROR WITH {e}')
+            return jsonify({'message': 'INVALID_KEY'}), 500
+
+        except Error as e:
+            print(f'DATABASE_CURSOR_ERROR_WITH {e}')
+            return jsonify({'message': 'DB_CURSOR_ERROR'}), 500
+
+    def make_order(self, order_info, db_connection):
+        try:
+            with db_connection.cursor() as db_cursor:
+
+                # check existence of the cart matching to user_account_id
+                db_cursor.execute('''
+                    SELECT 
+                    EXISTS(SELECT id FROM carts WHERE id = %(cart_id)s AND is_checked_out = 0) as existence
+                ''', order_info)
+                if db_cursor.fetchone().get('existence', None) == 0:
+                    return jsonify({'message': 'CART_NOT_EXISTS'}), 404
+
+                # check out cart
+                db_cursor.execute("""
+                    UPDATE carts
+                    SET is_checked_out = 1
+                    WHERE id = %(cart_id)s
+                """, order_info)
+                order_info['order_number'] = self.gen_random_name()
+
+                db_cursor.execute("""
+                    UPDATE orders
+                    SET is_checked_out = 1
+                    WHERE cart_id = %(cart_id)s
+                """, order_info)
+
+                # make an order
+                db_cursor.execute("""
+                    INSERT INTO receipts
+                    (
+                        cart_id,
+                        order_number
+                    ) VALUES (
+                        %(cart_id)s,
+                        %(order_number)s
+                    )
+                """, order_info)
+
+                recent_receipt_id = db_cursor.lastrowid
+                db_connection.commit()
+
+                return jsonify({
+                    'checked_out_cart_id': order_info.get('cart_id', None),
+                    'receipt_id': recent_receipt_id
+                }), 200
+
+        except KeyError as e:
+            print(f'KEY_ERROR WITH {e}')
+            return jsonify({'message': 'INVALID_KEY'}), 500
+
+        except Error as e:
+            print(f'DATABASE_CURSOR_ERROR_WITH {e}')
+            return jsonify({'message': 'DB_CURSOR_ERROR'}), 500
+
+    def get_order_receipt(self, receipt_info, db_connection):
+        try:
+            with db_connection.cursor() as db_cursor:
+                db_cursor.execute('''
+                    SELECT * 
+                    FROM receipts
+                    LEFT JOIN carts ON receipts.cart_id = carts.id
+                    WHERE carts.id = %(checked_out_cart_id)s
+                    AND receipts.id = %(receipt_id)s
+                    AND user_account_id = %(user_account_id)s
+                ''', receipt_info)
+                receipt_detail = db_cursor.fetchone()
+                if not receipt_detail:
+                    return jsonify({'message': 'ORDER_NOT_EXISTS'}), 404
+
+                db_cursor.execute("""
+                    SELECT 
+                        (select COUNT(0) from orders where products.id = orders.product_id and carts.id = orders.cart_id) as units,
+                        products.id AS product_id,
+                        products.name AS product_name    
+                    FROM carts
+                    RIGHT JOIN orders ON carts.id = orders.cart_id 
+                    LEFT JOIN products ON products.id = orders.product_id
+                    WHERE carts.is_checked_out = 1
+                    AND carts.id = %(checked_out_cart_id)s
+                    AND orders.is_checked_out = 1
+                    GROUP BY orders.product_id
+                    LIMIT %(limit)s OFFSET %(offset)s
+                """, receipt_info)
+                order_list = db_cursor.fetchall()
+                receipt_detail['order_list'] = order_list
+
+                return jsonify({'receipt': receipt_detail}), 200
 
         except KeyError as e:
             print(f'KEY_ERROR WITH {e}')

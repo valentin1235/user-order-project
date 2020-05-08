@@ -81,11 +81,11 @@ class ProductDao:
                     WHERE user_account_id = %(user_account_id)s
                     AND is_checked_out = 0
                 """, cart_info)
-                cart_info['cart_id'] = db_cursor.fetchone().get('id', None)
-                print(cart_info)
+                current_cart_id = db_cursor.fetchone()
+                if current_cart_id:
+                    cart_info['cart_id'] = current_cart_id.get('id', None)
 
-                if not cart_info['cart_id']:
-
+                elif not current_cart_id:
                     # create new cart
                     db_cursor.execute("""
                         INSERT INTO carts
@@ -129,8 +129,9 @@ class ProductDao:
 
                 db_cursor.execute("""
                    DELETE FROM orders
-                   WHERE cart_id = (select id from carts where user_account_id = %(user_account_id)s)
+                   WHERE cart_id = (select id from carts where user_account_id = %(user_account_id)s and is_checked_out = 0)
                    AND product_id = %(product_id)s
+                   AND is_checked_out = 0
                 """, cart_info)
 
                 db_connection.commit()
@@ -151,13 +152,18 @@ class ProductDao:
         try:
             with db_connection.cursor() as db_cursor:
                 db_cursor.execute("""
-                    select id from orders where product_id = %(product_id)s order by created_at desc limit 1
+                    select id 
+                    from orders 
+                    where product_id = %(product_id)s 
+                    and is_checked_out = 0 
+                    order by created_at desc 
+                    limit 1
                 """, cart_info)
                 cart_info['recent_order_id'] = db_cursor.fetchone()['id']
 
                 db_cursor.execute("""
                    DELETE FROM orders
-                   WHERE cart_id = (select id from carts where user_account_id = %(user_account_id)s)
+                   WHERE cart_id = (select id from carts where user_account_id = %(user_account_id)s and is_checked_out = 0)
                    AND id = %(recent_order_id)s
                 """, cart_info)
 

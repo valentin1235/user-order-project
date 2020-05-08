@@ -278,3 +278,65 @@ class UserView:
                 db_connection.close()
             except Exception as e:
                 return jsonify({'message': f'{e}'}), 500
+
+    @user_app.route('/my-cart/order', methods=['POST'], endpoint='check_out_cart')
+    @login_required
+    @validate_params(
+        Param('cart_id', JSON, int)
+    )
+    def make_order(*args):
+        user = g.account_info
+        order_info = {
+            'user_account_id': user.get('user_account_id'),
+            'cart_id': args[0]
+        }
+        try:
+            db_connection = get_db_connection()
+            if db_connection:
+                user_service = UserService()
+                make_order_result = user_service.make_order(order_info, db_connection)
+                return make_order_result
+            else:
+                return jsonify({'message': 'NO_DATABASE_CONNECTION'}), 500
+
+        except Exception as e:
+            return jsonify({'message': f'{e}'}), 500
+
+        finally:
+            try:
+                db_connection.close()
+            except Exception as e:
+                return jsonify({'message': f'{e}'}), 500
+
+    @user_app.route('/my-cart/order', methods=['GET'], endpoint='get_order_receipt')
+    @login_required
+    @validate_params(
+        Param('receipt_id', GET, int),
+        Param('checked_out_cart_id', GET, int)
+    )
+    def get_order_receipt(*args):
+        user = g.account_info
+        receipt_info = {
+            'receipt_id': args[0],
+            'checked_out_cart_id': args[1],
+            'user_account_id': user.get('user_account_id', None),
+            'offset': 0,
+            'limit': 10
+        }
+        try:
+            db_connection = get_db_connection()
+            if db_connection:
+                user_service = UserService()
+                get_order_receipt_result = user_service.get_order_receipt(receipt_info, db_connection)
+                return get_order_receipt_result
+            else:
+                return jsonify({'message': 'NO_DATABASE_CONNECTION'}), 500
+
+        except Exception as e:
+            return jsonify({'message': f'{e}'}), 500
+
+        finally:
+            try:
+                db_connection.close()
+            except Exception as e:
+                return jsonify({'message': f'{e}'}), 500

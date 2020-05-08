@@ -107,3 +107,21 @@ class UserService:
 
         except Exception as e:
             return jsonify({'message': f'{e}'}), 500
+
+    def make_order(self, order_info, db_connection):
+        user_dao = UserDao()
+        try:
+            make_order_result = user_dao.make_order(order_info, db_connection)
+            return make_order_result
+
+        except Exception as e:
+            return jsonify({'message': f'{e}'}), 500
+
+    def get_order_receipt(self, receipt_info, db_connection):
+        user_dao = UserDao()
+        try:
+            get_order_receipt_result = user_dao.get_order_receipt(receipt_info, db_connection)
+            return get_order_receipt_result
+
+        except Exception as e:
+            return jsonify({'message': f'{e}'}), 500
