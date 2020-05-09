@@ -15,7 +15,6 @@ class UserDao:
     def sign_up(self, user_info, db_connection, redis_connection):
         try:
             with db_connection.cursor() as db_cursor:
-
                 insert_user_accounts_statement = """
                     INSERT INTO user_accounts(
                         email,
@@ -24,14 +23,10 @@ class UserDao:
                         %(email)s,
                         %(password)s
                     )"""
-
                 db_cursor.execute(insert_user_accounts_statement, user_info)
-
                 user_account_id = db_cursor.lastrowid
                 user_info['user_account_id'] = user_account_id
 
-                # user_infos 생성
-                # 셀러정보 INSERT 문
                 insert_user_infos_statement = """
                     INSERT INTO user_infos(
                         name,
@@ -46,9 +41,8 @@ class UserDao:
                         %(gender_id)s,
                         %(user_account_id)s
                     )"""
-
-                # 데이터 sql 명령문과 셀러 데이터 바인딩
                 db_cursor.execute(insert_user_infos_statement, user_info)
+
                 db_connection.commit()
 
             if user_info['user_account_id']:
@@ -74,8 +68,6 @@ class UserDao:
 
         try:
             with db_connection.cursor() as db_cursor:
-
-                # 계정 SELECT 문
                 select_user_account_statement = """
                     SELECT id
                     FROM user_accounts
@@ -83,30 +75,21 @@ class UserDao:
                     AND is_deleted = 0
                 """
 
-                # service 에서 넘어온 셀러 데이터
                 input_email = {
                     'email': email
                 }
-
-                # 데이터 sql 명령문과 셀러 데이터 바인딩
                 db_cursor.execute(select_user_account_statement, input_email)
-
-                # 쿼리로 나온 계정번호를 저장
                 select_result = db_cursor.fetchone()
                 return select_result
 
-        # 데이터베이스 error
         except Exception as e:
             print(f'DAO_DATABASE_CURSOR_ERROR_WITH {e}')
             return jsonify({'error': 'DB_CURSOR_ERROR'}), 500
 
-    # noinspection PyMethodMayBeStatic
     def check_overlap_nick_name(self, nick_name, db_connection):
 
         try:
             with db_connection.cursor() as db_cursor:
-
-                # 셀러정보 SELECT 문
                 select_user_info_statement = """
                     SELECT id
                     FROM user_infos
@@ -114,15 +97,10 @@ class UserDao:
                     AND is_deleted = 0
                 """
 
-                # service 에서 넘어온 셀러 데이터
                 input_nick_name = {
                     'nick_name': nick_name
                 }
-
-                # 데이터 sql 명령문과 셀러 데이터 바인딩
                 db_cursor.execute(select_user_info_statement, input_nick_name)
-
-                # 쿼리로 나온 셀러정보 번호를 저장
                 select_result = db_cursor.fetchone()
                 return select_result
 
@@ -136,26 +114,16 @@ class UserDao:
             return jsonify({'error': 'DB_CURSOR_ERROR'}), 500
 
     def get_account_info(self, user_account_info, db_connection):
-
         try:
-            # db_cursor 는 db_connection 에 접근하는 본체 (가져온 정보는 cursor 가 가지고 있다)
             with db_connection as db_cursor:
-
-                # sql 문 작성 (원하는 정보를 가져오거나 집어넣거나)
                 select_user_account_statement = """
                     SELECT id, password                    
                     FROM user_accounts  
                     WHERE email = %(email)s 
                     AND is_deleted = 0
                 """
-
-                # SELECT 문 실행
                 db_cursor.execute(select_user_account_statement, user_account_info)
-
-                # DB 에 저장하는 로직 작성 (fetchone, fetchall, fetchmany)
                 user_account_result = db_cursor.fetchone()
-
-                # DB 에서 꺼내온 정보를 return
                 return user_account_result
 
         except KeyError as e:
@@ -242,7 +210,7 @@ class UserDao:
         select_user_list_statement += " ORDER BY ua.created_at DESC LIMIT %(limit)s OFFSET %(offset)s"
 
         try:
-            with db_connection as db_cursor:
+            with db_connection.cursor() as db_cursor:
 
                 # sql 쿼리와 pagination 데이터 바인딩
                 db_cursor.execute(select_user_list_statement, user_search_keywords)
@@ -267,7 +235,6 @@ class UserDao:
                 user_count['filtered_user_count'] = filter_query_values_count['filtered_user_count']
                 return jsonify({'user_list': user_info, 'user_count': user_count}), 200
 
-        # 데이터베이스 error
         except Exception as e:
             print(f'DATABASE_CURSOR_ERROR_WITH {e}')
             return jsonify({'error': 'DB_CURSOR_ERROR'}), 500
@@ -294,17 +261,11 @@ class UserDao:
                     AND ui.close_time = '2037-12-31 23:59:59'
                     AND ua.auth_type_id = 2
                 """
-
-                # SELECT 문 실행
                 db_cursor.execute(select_target_user_statement, target_user_id)
-
-                # seller_info_result 에 쿼리 결과 저장
                 target_user_info = db_cursor.fetchone()
 
-                # 해당 번호의 셀러가 없으면 에러 리턴
                 if not target_user_info:
                     return jsonify({'message': 'USER_NOT_EXISTS'}), 404
-
                 return target_user_info
 
         except KeyError as e:
@@ -350,7 +311,6 @@ class UserDao:
                     GROUP BY orders.product_id
                     LIMIT %(limit)s OFFSET %(offset)s
                 """, cart_info)
-
                 cart_product_list = db_cursor.fetchall()
                 return jsonify({'cart_products': cart_product_list, 'cart_id': cart_id}), 200
 
@@ -405,8 +365,8 @@ class UserDao:
                         $(user_account_id)s
                     )
                 """, order_info)
-
                 recent_receipt_id = db_cursor.lastrowid
+
                 db_connection.commit()
 
                 return jsonify({

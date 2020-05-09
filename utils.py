@@ -1,8 +1,8 @@
-import jwt, uuid, io, os
+import jwt
 from mysql.connector.errors import Error
 from flask import request, jsonify, g
 
-from connection import DatabaseConnection
+from connection import get_db_connection
 from config import SECRET
 
 
@@ -15,10 +15,10 @@ def login_required(func):
                 payload = jwt.decode(access_token, SECRET['secret_key'], algorithm=SECRET['algorithm'])
                 user_account_id = payload['user_account_id']
 
-                db_connection = DatabaseConnection()
+                db_connection = get_db_connection()
                 if db_connection:
                     try:
-                        with db_connection as db_cursor:
+                        with db_connection.cursor() as db_cursor:
                             get_account_info_stmt = """
                                 SELECT auth_type_id, is_deleted FROM user_accounts WHERE id=%(id)s
                             """

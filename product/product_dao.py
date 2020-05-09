@@ -15,10 +15,10 @@ class ProductDao:
     def get_product_list(self, product_keyword_search, db_connection):
         try:
             with db_connection.cursor() as db_cursor:
-
                 get_product_list_statement = """
                     SELECT id, name
                     FROM products
+                    WHERE 1
                 """
 
                 id = product_keyword_search.get('id', None)
@@ -32,7 +32,6 @@ class ProductDao:
 
                 get_product_list_statement += " ORDER BY created_at DESC LIMIT %(limit)s OFFSET %(offset)s"
 
-                # 데이터 sql 명령문과 셀러 데이터 바인딩
                 db_cursor.execute(get_product_list_statement, product_keyword_search)
                 product_list = db_cursor.fetchall()
                 return jsonify({'product_list': product_list}), 200
@@ -57,7 +56,6 @@ class ProductDao:
                     WHERE id = %(product_id)s
                 """
 
-                # 데이터 sql 명령문과 셀러 데이터 바인딩
                 db_cursor.execute(get_product_detail_statement, product_id)
                 product_detail = db_cursor.fetchone()
                 return jsonify({'product_list': product_detail}), 200
@@ -86,6 +84,7 @@ class ProductDao:
                     cart_info['cart_id'] = current_cart_id.get('id', None)
 
                 elif not current_cart_id:
+
                     # create new cart
                     db_cursor.execute("""
                         INSERT INTO carts
@@ -95,7 +94,6 @@ class ProductDao:
                                 %(user_account_id)s
                             )
                         """, cart_info)
-
                     cart_info['cart_id'] = db_cursor.lastrowid
 
                 # create an order
@@ -126,7 +124,6 @@ class ProductDao:
     def delete_from_cart(self, cart_info, db_connection):
         try:
             with db_connection.cursor() as db_cursor:
-
                 db_cursor.execute("""
                    DELETE FROM orders
                    WHERE cart_id = (select id from carts where user_account_id = %(user_account_id)s and is_checked_out = 0)
@@ -148,7 +145,6 @@ class ProductDao:
             return jsonify({'message': 'DB_CURSOR_ERROR'}), 500
 
     def edit_unit_from_cart(self, cart_info, db_connection):
-
         try:
             with db_connection.cursor() as db_cursor:
                 db_cursor.execute("""

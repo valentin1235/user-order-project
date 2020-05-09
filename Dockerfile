@@ -14,10 +14,10 @@ RUN pip install -r requirements.txt
     
 ## Copy all src files
 COPY . .
+
 ## Run the application on the port 8080
 EXPOSE 5000   
 
     
-#CMD ["python", "./setup.py", "runserver", "--host=0.0.0.0", "-p 8080"]
 CMD ["python3", "manage.py"]
 
