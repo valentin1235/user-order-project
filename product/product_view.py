@@ -1,10 +1,6 @@
-import re
-import json
-
-from flask import request, Blueprint, jsonify, g
+from flask import Blueprint, jsonify, g
 from flask_request_validator import (
     GET,
-    FORM,
     PATH,
     JSON,
     Param,
@@ -14,14 +10,12 @@ from flask_request_validator import (
     validate_params
 )
 
-
 from .product_service import ProductService
-from connection import get_db_connection, DatabaseConnection, get_redis_connection
+from connection import get_db_connection
 from utils import login_required
 
 
 class ProductView:
-
     product_app = Blueprint('product_app', __name__, url_prefix='/product')
 
     @product_app.route('', methods=['GET'], endpoint='get_product_list')
@@ -42,7 +36,6 @@ class ProductView:
         if product_keyword_search['limit'] > 5000:
             return jsonify({'message': 'INVALID_REQUEST'}), 400
 
-        # 데이터베이스 연결
         try:
             db_connection = get_db_connection()
             if db_connection:
