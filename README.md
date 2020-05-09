@@ -5,9 +5,9 @@
 
 3. 가상환경 안에서 pip install -r requirements.txt 명령어를 통해서 필요 라이브러리를 다운받습니다. 또는 docker pull valentin1235/my_image:0.1 를 통해서 docker 이미지를 가져옵니다.
 
-3-1. docker 이미지를 pull 한 경우 sudo docker run -d -p 5000:5000 valentin1235/my_image:0.1 (리눅스 한정)명령어를 통해서 컨테이너를 만듭니다.
+4. docker 이미지를 pull 한 경우 sudo docker run -d -p 5000:5000 valentin1235/my_image:0.1 (리눅스 한정)명령어를 통해서 컨테이너를 만듭니다.
 
-4. config.py 파일을 connection.py 파일과 같은 디렉토리에 생성해주고 아래와같은 config 내용을 넣습니다(이프로젝트는 mysql을 데이터베이스로 사용하고 redis를 세션 저장공간으로 사용합니다)
+5. config.py 파일을 connection.py 파일과 같은 디렉토리에 생성해주고 아래와같은 config 내용을 넣습니다(이프로젝트는 mysql을 데이터베이스로 사용하고 redis를 세션 저장공간으로 사용합니다)
 
          DATABASES = {
              'user': 'database_user_name',
@@ -27,7 +27,7 @@
              'algorithm': 'HS256'
          }
          
-5. [API document](https://documenter.getpostman.com/view/10893095/SzmfYHBu?version=latest)를 참조해서 sign-up 부터 차례로 api를 호출할 수 있습니다.
+6. [API document](https://documenter.getpostman.com/view/10893095/SzmfYHBu?version=latest)를 참조해서 sign-up 부터 차례로 api를 호출할 수 있습니다.
 
 # Project Introduction
 
