@@ -152,6 +152,7 @@ Simple user management and product order project.
 # Technologies(Backend)
 + Python 3.8.0 : language
 + Pycharm venv : virtual environment
++ Docker       : image & container
 + Flask 1.1.2  : web framework
 + Git          : cooperation and version management tool
 + Redis        : Caching database
