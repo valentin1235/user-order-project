@@ -30,6 +30,8 @@
 6. [API document](https://documenter.getpostman.com/view/10893095/SzmfYHBu?version=latest)를 참조해서 sign-up 부터 차례로 api를 호출할 수 있습니다.
 
 # Project Introduction
+##### [프로젝트 후기](https://velog.io/@valentin123/Project5-About-User-Order-Project)
+
 
 Simple user management and product order project. 
 
