@@ -35,7 +35,7 @@
 
 Simple user management and product order project. 
 
-+ Project Period  : 6 days
++ Project Period  : 2020.05.04 - 2020.05.10
 
 + Member         : (backend) Heechul Yoon
          
