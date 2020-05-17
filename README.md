@@ -1,7 +1,8 @@
 # How to run
 1. 프로젝트를 클론합니다 
-1. Clone the project
-
+```diff
++ Clone the project
+```
 2. 가상환경을 만듭니다(작성자는 pycharm venv 사용)
 2. Create virtual environment(this project was made under the pycharm venv)
 
@@ -35,6 +36,8 @@ sudo docker run -d -p 5000:5000 valentin1235/my_image:0.1
          
 6. [API document](https://documenter.getpostman.com/view/10893095/SzmfYHBu?version=latest)를 참조해서 sign-up 부터 차례로 api를 호출할 수 있습니다.
 6. You could check the [API document](https://documenter.getpostman.com/view/10893095/SzmfYHBu?version=latest) as a description of the API
+
+
 
 # Project Introduction
 ##### [프로젝트 후기](https://velog.io/@valentin123/Project5-About-User-Order-Project)
