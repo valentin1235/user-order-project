@@ -1,13 +1,19 @@
 # How to run
-1. 프로젝트를 클론합니다
+1. 프로젝트를 클론합니다 
+1. Clone the project
 
 2. 가상환경을 만듭니다(작성자는 pycharm venv 사용)
+2. Create virtual environment(this project was made under the pycharm venv)
 
 3. 가상환경 안에서 pip install -r requirements.txt 명령어를 통해서 필요 라이브러리를 다운받습니다. 또는 docker pull valentin1235/my_image:0.1 를 통해서 docker 이미지를 가져옵니다.
+3. download required library through 'pip install -r requirements.txt' or you can import an image through 'docker pull valentin1235/my_image:0.1' commandline
 
 4. docker 이미지를 pull 한 경우 sudo docker run -d -p 5000:5000 valentin1235/my_image:0.1 (리눅스 한정)명령어를 통해서 컨테이너를 만듭니다.
+4. If you are about to run the project via dockr, you want to create container based on the imported image. follow the command below
+sudo docker run -d -p 5000:5000 valentin1235/my_image:0.1
 
 5. config.py 파일을 connection.py 파일과 같은 디렉토리에 생성해주고 아래와같은 config 내용을 넣습니다(이프로젝트는 mysql을 데이터베이스로 사용하고 redis를 세션 저장공간으로 사용합니다)
+5. create config.py at the same dicrectory as connection.py and put the content as followed(in order to run the project, mysql for database and redis for caching database are required)
 
          DATABASES = {
              'user': 'database_user_name',
@@ -28,6 +34,7 @@
          }
          
 6. [API document](https://documenter.getpostman.com/view/10893095/SzmfYHBu?version=latest)를 참조해서 sign-up 부터 차례로 api를 호출할 수 있습니다.
+6. You could check the [API document](https://documenter.getpostman.com/view/10893095/SzmfYHBu?version=latest) as a description of the API
 
 # Project Introduction
 ##### [프로젝트 후기](https://velog.io/@valentin123/Project5-About-User-Order-Project)
@@ -42,7 +49,8 @@ Simple user management and product order project.
 
 # Function Description
 [프로젝트 설계]
-+ model, service, view 레이어 간 의존성 설정
++ model, service, view 레이어 간 의존성 설정 <span style="color: green"> create the dependency among model, service and view </span>create the dependency among model, service and view
+- 
 + 데이터베이스 모델링(aquery tools 사용)
 + 초기 데이이터베이스 스크립트 생성 : 테이블, 외래키 관계, 기초 데이터 생성
 + pycharm venv를 사용한 가상환경 설정(python3.8)
