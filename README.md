@@ -49,7 +49,7 @@ Simple user management and product order project.
 
 # Function Description
 [프로젝트 설계]
-+ model, service, view 레이어 간 의존성 설정 <span style="color: green"> create the dependency among model, service and view </span>create the dependency among model, service and view
++ model, service, view 레이어 간 의존성 설정  create the dependency among model, service and view <p style='color:red'>create the dependency among model, service and view</p>
 - 
 + 데이터베이스 모델링(aquery tools 사용)
 + 초기 데이이터베이스 스크립트 생성 : 테이블, 외래키 관계, 기초 데이터 생성
