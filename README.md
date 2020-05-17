@@ -50,9 +50,9 @@ Simple user management and product order project.
 
 # Function Description
 [프로젝트 설계]
-+ model, service, view 레이어 간 의존성 설정  create the dependency among model, service and view 
-+ 데이터베이스 모델링(aquery tools 사용)   database modeling via aquery tools
-+ 초기 데이이터베이스 스크립트 생성 : 테이블, 외래키 관계, 기초 데이터 생성    create initial database script : table, FK relation, basic data
++ model, service, view 레이어 간 의존성 설정 
++ 데이터베이스 모델링(aquery tools 사용)   
++ 초기 데이이터베이스 스크립트 생성 : 테이블, 외래키 관계, 기초 데이터 생성    
 + pycharm venv를 사용한 가상환경 설정(python3.8)
 + .gitignore 파일 생성
 + model : 데이터베이스와 통신
