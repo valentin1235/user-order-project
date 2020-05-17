@@ -1,13 +1,10 @@
 # How to run
 1. 프로젝트를 클론합니다 
-```diff
-+ Clone the project
-```
-2. 가상환경을 만듭니다(작성자는 pycharm venv 사용)
-2. Create virtual environment(this project was made under the pycharm venv)
+Clone the project
+2. 가상환경을 만듭니다(작성자는 pycharm venv 사용) 
+Create virtual environment(this project was made under the pycharm venv)
 
-3. 가상환경 안에서 pip install -r requirements.txt 명령어를 통해서 필요 라이브러리를 다운받습니다. 또는 docker pull valentin1235/my_image:0.1 를 통해서 docker 이미지를 가져옵니다.
-3. download required library through 'pip install -r requirements.txt' or you can import an image through 'docker pull valentin1235/my_image:0.1' commandline
+3. 가상환경 안에서 pip install -r requirements.txt 명령어를 통해서 필요 라이브러리를 다운받습니다. 또는 docker pull valentin1235/my_image:0.1 를 통해서 docker 이미지를 가져옵니다. download required library through 'pip install -r requirements.txt' or you can import an image through 'docker pull valentin1235/my_image:0.1' commandline
 
 4. docker 이미지를 pull 한 경우 sudo docker run -d -p 5000:5000 valentin1235/my_image:0.1 (리눅스 한정)명령어를 통해서 컨테이너를 만듭니다.
 4. If you are about to run the project via dockr, you want to create container based on the imported image. follow the command below
