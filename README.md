@@ -1,6 +1,6 @@
 # How to run
 1. 프로젝트를 클론합니다 
-Clone the project
+> Clone the project
 2. 가상환경을 만듭니다(작성자는 pycharm venv 사용) 
 Create virtual environment(this project was made under the pycharm venv)
 
