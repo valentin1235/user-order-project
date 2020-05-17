@@ -1,6 +1,7 @@
 # How to run
  1. 프로젝트를 클론합니다 
 > 1. Clone the project
+
 2. 가상환경을 만듭니다(작성자는 pycharm venv 사용) 
 > 2. Create virtual environment(this project was made under the pycharm venv)
 
@@ -32,8 +33,11 @@ sudo docker run -d -p 5000:5000 valentin1235/my_image:0.1
              'algorithm': 'HS256'
          }
          
-6. [API document](https://documenter.getpostman.com/view/10893095/SzmfYHBu?version=latest)를 참조해서 sign-up 부터 차례로 api를 호출할 수 있습니다.
-> 6. You could check the [API document](https://documenter.getpostman.com/view/10893095/SzmfYHBu?version=latest) as a description of the API
+6. ./db_script/table_schema_v1.sql 파일을 사용해서 데이터베이스에 테이블, FK관계, 기초 데이터를 생성합니다
+> 6. create tables via ./db_script/table_schema_v1.sql file
+
+7. [API document](https://documenter.getpostman.com/view/10893095/SzmfYHBu?version=latest)를 참조해서 sign-up 부터 차례로 api를 호출할 수 있습니다.
+> 7. You could check the [API document](https://documenter.getpostman.com/view/10893095/SzmfYHBu?version=latest) as a description of the API
 
 
 
