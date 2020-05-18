@@ -71,29 +71,14 @@ class UserService:
 
         # get user information from dao
         user_info = user_dao.get_user_info(target_user_info, db_connection)
+        if not user_info:
+            return jsonify({'message': 'USER_NOT_EXISTS'}), 404
 
-        # get order receipt of the user from dao
-        try:
-            with db_connection.cursor() as db_cursor:
-                db_cursor.execute("""
-                    select cart_id from receipts where id = %(receipt_id)s
-                """, target_user_info)
-                cart_id = db_cursor.fetchone()
-                if not cart_id:
-                    return jsonify({'message': 'INVALID_RECEIPT'}), 400
+        # get receipt list of the user from dao
+        receipt_detail = user_dao.get_receipt_list_from_assgined_user(target_user_info, db_connection)
+        user_info['receipt_detail'] = receipt_detail
 
-                target_user_info['checked_out_cart_id'] = cart_id.get('cart_id', None)
-                receipt_detail = user_dao.get_order_receipt(target_user_info, db_connection)
-                user_info['receipt_detail'] = receipt_detail
-                return jsonify({'user_info': user_info}), 200
-
-        except KeyError as e:
-            print(f'KEY_ERROR WITH {e}')
-            return jsonify({'message': 'INVALID_KEY'}), 500
-
-        except Exception as e:
-            print(e)
-            return jsonify({'message': f'{e}'}), 500
+        return jsonify({'user_info': user_info}), 200
 
     def get_my_page(self, user_account_id, db_connection):
         user_dao = UserDao()

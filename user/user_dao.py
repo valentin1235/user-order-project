@@ -264,8 +264,8 @@ class UserDao:
                 db_cursor.execute(select_target_user_statement, target_user_id)
                 target_user_info = db_cursor.fetchone()
 
-                if not target_user_info:
-                    return jsonify({'message': 'USER_NOT_EXISTS'}), 404
+                # if not target_user_info:
+                #     return jsonify({'message': 'USER_NOT_EXISTS'}), 404
                 return target_user_info
 
         except KeyError as e:
@@ -385,6 +385,8 @@ class UserDao:
     def get_order_receipt(self, receipt_info, db_connection):
         try:
             with db_connection.cursor() as db_cursor:
+
+                # get single receipt from a user
                 db_cursor.execute('''
                     SELECT * 
                     FROM receipts
@@ -397,6 +399,7 @@ class UserDao:
                 if not receipt_detail:
                     return jsonify({'message': 'ORDER_NOT_EXISTS'}), 404
 
+                # get order list from a cart owned by the input user
                 db_cursor.execute("""
                     SELECT 
                         (select COUNT(0) from orders where products.id = orders.product_id and carts.id = orders.cart_id) as units,
@@ -423,3 +426,43 @@ class UserDao:
             print(f'DATABASE_CURSOR_ERROR_WITH {e}')
             return jsonify({'message': 'DB_CURSOR_ERROR'}), 500
 
+    def get_receipt_list_from_assgined_user(self, target_user_info, db_connection):
+        try:
+            with db_connection.cursor() as db_cursor:
+
+                # get receipt detail from assigned user
+                db_cursor.execute('''
+                    SELECT order_number, id as receipt_id, cart_id
+                    FROM receipts
+                    WHERE receipts.user_account_id = %(user_account_id)s
+                ''', target_user_info)
+                receipt_list_from_user = db_cursor.fetchall()
+
+                # add order list from picked cart to the receipt detail
+                for receipt in receipt_list_from_user:
+                    receipt_info = {'checked_out_cart_id': receipt.get('cart_id', None)}
+                    db_cursor.execute("""
+                        SELECT
+                            (select COUNT(0) from orders where products.id = orders.product_id and carts.id = orders.cart_id) as units,
+                            products.id AS product_id,
+                            products.name AS product_name
+                        FROM carts
+                        RIGHT JOIN orders ON carts.id = orders.cart_id
+                        LEFT JOIN products ON products.id = orders.product_id
+                        WHERE carts.is_checked_out = 1
+                        AND carts.id = %(checked_out_cart_id)s
+                        AND orders.is_checked_out = 1
+                        GROUP BY orders.product_id
+                    """, receipt_info)
+                    order_list = db_cursor.fetchall()
+                    receipt['order_list'] = order_list
+
+                return receipt_list_from_user
+
+        except KeyError as e:
+            print(f'KEY_ERROR WITH {e}')
+            return jsonify({'message': 'INVALID_KEY'}), 500
+
+        except Error as e:
+            print(f'DATABASE_CURSOR_ERROR_WITH {e}')
+            return jsonify({'message': 'DB_CURSOR_ERROR'}), 500
