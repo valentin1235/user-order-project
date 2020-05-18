@@ -73,6 +73,11 @@ class ProductDao:
     def add_to_cart(self, cart_info, db_connection):
         try:
             with db_connection.cursor() as db_cursor:
+                db_cursor.execute('select id from products where id = %(product_id)s', cart_info)
+                product = db_cursor.fetchone()
+                if not product:
+                    return jsonify({'message': 'PRODUCT_NOT_EXISTS'}), 404
+
                 db_cursor.execute("""
                     SELECT id
                     FROM carts
