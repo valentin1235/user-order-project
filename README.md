@@ -103,6 +103,7 @@ Simple user management and product order project.
 
 
 [유저 상세 정보 표출]
++ 유저의 상세정보와 유저의 전체 주문서 표출
 + 마스터 권한으로 확인하고자 하는 유저의 id를 쿼리파라미터에 넣어서 요청
 + 권한 타입 유효성 검사
 + 선분이력상 close_time이 2037-12-31인 유저정보(가장 최근 이력에 해당되기 때문)를 가져옴
@@ -141,7 +142,6 @@ Simple user management and product order project.
 + my-cart를 통해서 얻은 cart_id를 POST해서 해당 장바구니의 상태를 check out으로 바꿈
 + check out으로 바뀐 장바구니의 주문 명세서를 생성함(주문번호는 uuid로 생성)
 + 생성된 주문 명세서 번호, check out 한 장바구니 번호를 리턴
-
 
 [주문서 표출]
 + 주문서를 생성하고 받은 명세서 번호와 장바구니 번호를 쿼리파라미터로 보냄
