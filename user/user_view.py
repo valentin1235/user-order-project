@@ -171,17 +171,15 @@ class UserView:
             except Exception as e:
                 return jsonify({'message': f'{e}'}), 500
 
-    @user_app.route('/<int:user_id>/<int:receipt_id>', methods=['GET'], endpoint='get_user_info')
+    @user_app.route('/<int:user_id>', methods=['GET'], endpoint='get_user_info')
     @login_required
     @validate_params(
-        Param('user_id', PATH, int),
-        Param('receipt_id', PATH, int)
+        Param('user_id', PATH, int)
     )
     def get_user_info(*args):
         user = g.account_info
         target_user_info = {
             'user_account_id': args[0],
-            'receipt_id': args[1]
         }
 
         try:
