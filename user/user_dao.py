@@ -362,7 +362,7 @@ class UserDao:
                     ) VALUES (
                         %(cart_id)s,
                         %(order_number)s,
-                        $(user_account_id)s
+                        %(user_account_id)s
                     )
                 """, order_info)
                 recent_receipt_id = db_cursor.lastrowid
